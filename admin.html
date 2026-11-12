@@ -29,13 +29,14 @@
 
     <div class="box">
         <h3>Danh Sách Key</h3>
-        <button onclick="loadKeys()">Tải Lại</button>
+        <button onclick="loadStatus()">Tải Lại</button>
         <pre id="keyList">Đang tải...</pre>
     </div>
 
 <script>
-    const API_URL = 'http://localhost:3000/api/admin';
-    const PASS = 'admin123'; // Phải khớp với server.js
+    // Render sẽ tự hiểu API này
+    const API_URL = '/api/admin';
+    const PASS = 'admin123'; // Khớp với server.js
 
     async function adminAction(action) {
         const res = await fetch(API_URL, {
