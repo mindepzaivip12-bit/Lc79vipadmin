@@ -5,10 +5,11 @@
 <title>Admin Panel</title>
 <style>
     body { font-family: sans-serif; background: #111; color: #fff; padding: 20px; }
-    input, button { padding: 10px; margin: 5px 0; width: 100%; max-width: 300px; border-radius: 5px; border: none; }
+    input, select, button { padding: 10px; margin: 5px 0; width: 100%; max-width: 300px; border-radius: 5px; border: none; }
     button { background: #ff1a8c; color: white; cursor: pointer; font-weight: bold; }
     .box { background: #222; padding: 20px; border-radius: 10px; margin-bottom: 20px; max-width: 400px; }
     pre { background: #000; padding: 10px; overflow-x: auto; font-size: 12px; }
+    .row { display: flex; gap: 10px; }
 </style>
 </head>
 <body>
@@ -22,9 +23,16 @@
     <div class="box">
         <h3>Tạo Key VIP</h3>
         <input type="text" id="keyName" placeholder="Nhập tên key (để trống tự tạo)">
-        <input type="number" id="keyDays" placeholder="Số ngày sử dụng" value="1">
+        <div class="row">
+            <input type="number" id="keyAmount" placeholder="Số lượng" value="1" style="width: 50%;">
+            <select id="keyUnit" style="width: 50%;">
+                <option value="days">Ngày</option>
+                <option value="hours">Giờ</option>
+                <option value="minutes">Phút</option>
+            </select>
+        </div>
         <button onclick="createKey()">Tạo Key</button>
-        <p id="msg" style="color: #22c55e;"></p>
+        <p id="msg" style="color: #22c55e; word-break: break-all;"></p>
     </div>
 
     <div class="box">
@@ -34,7 +42,6 @@
     </div>
 
 <script>
-    // Render sẽ tự hiểu API này
     const API_URL = '/api/admin';
     const PASS = 'admin123'; // Khớp với server.js
 
@@ -59,17 +66,19 @@
         let html = "";
         for (let k in data.keys) {
             const exp = new Date(data.keys[k].expiresAt).toLocaleString('vi-VN');
-            html += `Key: ${k} | Hạn: ${exp} | IP: ${data.keys[k].ip || 'Chưa dùng'}\n`;
+            html += `Key: ${k}\nHạn: ${exp}\nIP: ${data.keys[k].ip || 'Chưa dùng'}\n-------------------\n`;
         }
         document.getElementById('keyList').innerText = html || "Chưa có key nào";
     }
 
     async function createKey() {
         const key = document.getElementById('keyName').value;
-        const days = document.getElementById('keyDays').value;
+        const amount = document.getElementById('keyAmount').value;
+        const unit = document.getElementById('keyUnit').value;
+        
         const res = await fetch(API_URL, {
             method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ password: PASS, action: 'create_key', key: key, days: days })
+            body: JSON.stringify({ password: PASS, action: 'create_key', key: key, amount: amount, unit: unit })
         });
         const data = await res.json();
         document.getElementById('msg').innerText = data.msg + ": " + (data.key || '');
