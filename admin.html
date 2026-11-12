@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Admin Panel</title>
+<style>
+    body { font-family: sans-serif; background: #111; color: #fff; padding: 20px; }
+    input, button { padding: 10px; margin: 5px 0; width: 100%; max-width: 300px; border-radius: 5px; border: none; }
+    button { background: #ff1a8c; color: white; cursor: pointer; font-weight: bold; }
+    .box { background: #222; padding: 20px; border-radius: 10px; margin-bottom: 20px; max-width: 400px; }
+    pre { background: #000; padding: 10px; overflow-x: auto; font-size: 12px; }
+</style>
+</head>
+<body>
+    <h2>Quản Trị Hệ Thống</h2>
+    
+    <div class="box">
+        <h3>Bật/Tắt Bảo Trì</h3>
+        <button onclick="adminAction('toggle_maintenance')" id="btnMaintain">Đang tải...</button>
+    </div>
+
+    <div class="box">
+        <h3>Tạo Key VIP</h3>
+        <input type="text" id="keyName" placeholder="Nhập tên key (để trống tự tạo)">
+        <input type="number" id="keyDays" placeholder="Số ngày sử dụng" value="1">
+        <button onclick="createKey()">Tạo Key</button>
+        <p id="msg" style="color: #22c55e;"></p>
+    </div>
+
+    <div class="box">
+        <h3>Danh Sách Key</h3>
+        <button onclick="loadKeys()">Tải Lại</button>
+        <pre id="keyList">Đang tải...</pre>
+    </div>
+
+<script>
+    const API_URL = 'http://localhost:3000/api/admin';
+    const PASS = 'admin123'; // Phải khớp với server.js
+
+    async function adminAction(action) {
+        const res = await fetch(API_URL, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ password: PASS, action: action })
+        });
+        const data = await res.json();
+        alert(data.msg);
+        loadStatus();
+    }
+
+    async function loadStatus() {
+        const res = await fetch(API_URL, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ password: PASS, action: 'get_keys' })
+        });
+        const data = await res.json();
+        document.getElementById('btnMaintain').innerText = data.maintenance ? "TẮT BẢO TRÌ (Đang Bật)" : "BẬT BẢO TRÌ (Đang Tắt)";
+        
+        let html = "";
+        for (let k in data.keys) {
+            const exp = new Date(data.keys[k].expiresAt).toLocaleString('vi-VN');
+            html += `Key: ${k} | Hạn: ${exp} | IP: ${data.keys[k].ip || 'Chưa dùng'}\n`;
+        }
+        document.getElementById('keyList').innerText = html || "Chưa có key nào";
+    }
+
+    async function createKey() {
+        const key = document.getElementById('keyName').value;
+        const days = document.getElementById('keyDays').value;
+        const res = await fetch(API_URL, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ password: PASS, action: 'create_key', key: key, days: days })
+        });
+        const data = await res.json();
+        document.getElementById('msg').innerText = data.msg + ": " + (data.key || '');
+        loadStatus();
+    }
+
+    loadStatus();
+</script>
+</body>
+</html>
