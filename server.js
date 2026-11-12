@@ -6,7 +6,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Cho phép các domain khác (như Vercel, Netlify) gọi API
+// Cho phép các domain khác gọi API (CORS)
 app.use(cors());
 app.use(express.json());
 
@@ -20,15 +20,27 @@ if (!fs.existsSync(DB_FILE)) {
 const getDB = () => JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
 const saveDB = (data) => fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 
-// Lấy IP thực của người dùng (Quan trọng để khóa 1 IP)
+// Lấy IP thực của người dùng (Dùng để khóa 1 IP cho 1 Key)
 const getClientIp = (req) => {
     let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    if (ip && ip.includes(',')) ip = ip.split(',')[0]; // Lấy IP đầu tiên nếu qua proxy
+    if (ip && ip.includes(',')) ip = ip.split(',')[0]; 
     return ip ? ip.trim() : 'unknown';
 };
 
 // ==========================================
-// CÁC API CHO WEB CHÍNH (INDEX.HTML)
+// TỰ ĐỘNG CHUYỂN HƯỚNG TRANG CHỦ SANG ADMIN
+// ==========================================
+app.get('/', (req, res) => {
+    res.redirect('/admin');
+});
+
+// Hiển thị giao diện Admin (Yêu cầu file admin.html phải nằm cùng thư mục)
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// ==========================================
+// CÁC API CHO WEB CHÍNH (Dùng cho index.html)
 // ==========================================
 
 // 1. API Kiểm tra trạng thái bảo trì
@@ -37,7 +49,7 @@ app.get('/api/status', (req, res) => {
     res.json({ maintenance: db.maintenance });
 });
 
-// 2. API Kích hoạt Key (Cố định 1 IP)
+// 2. API Kích hoạt Key
 app.post('/api/activate', (req, res) => {
     const { key } = req.body;
     const clientIp = getClientIp(req);
@@ -51,7 +63,7 @@ app.post('/api/activate', (req, res) => {
     if (!keyData) return res.json({ success: false, msg: "Key không hợp lệ!" });
     if (Date.now() > keyData.expiresAt) return res.json({ success: false, msg: "Key đã hết hạn!" });
     
-    // Kiểm tra IP
+    // Kiểm tra cố định 1 IP
     if (keyData.ip && keyData.ip !== clientIp) {
         return res.json({ success: false, msg: "Key này đã bị khóa vào IP khác!" });
     }
@@ -67,16 +79,10 @@ app.post('/api/activate', (req, res) => {
 
 
 // ==========================================
-// API & GIAO DIỆN CHO TRANG ADMIN
+// API DÀNH CHO TRANG ADMIN
 // ==========================================
-const ADMIN_PASS = "admin123"; // Nhớ đổi mật khẩu này nếu cần
+const ADMIN_PASS = "admin123"; // Mật khẩu đăng nhập Admin (Bạn có thể đổi tại đây)
 
-// Hiển thị giao diện Admin (Chỉ cần up file admin.html lên Github)
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
-});
-
-// API xử lý các lệnh của Admin
 app.post('/api/admin', (req, res) => {
     const { password, action, key, days } = req.body;
     if (password !== ADMIN_PASS) return res.status(403).json({ success: false, msg: "Sai mật khẩu!" });
@@ -107,8 +113,10 @@ app.post('/api/admin', (req, res) => {
     }
 });
 
-// Khởi chạy Server
+// ==========================================
+// KHỞI CHẠY SERVER
+// ==========================================
 app.listen(PORT, () => {
     console.log(`Server đang chạy tại port ${PORT}`);
-    console.log(`Trang Admin: https://TEN_RENDER_CUA_BAN.onrender.com/admin`);
+    console.log(`Link Admin: https://bontooltxios.onrender.com/admin`);
 });
