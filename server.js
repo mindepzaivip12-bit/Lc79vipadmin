@@ -21,6 +21,9 @@ const saveConfig = (data) => fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, 
 
 const ADMIN_PASS = "admin123"; 
 
+// ==========================================
+// GIAO DIỆN ADMIN
+// ==========================================
 function renderAdmin(req, res) {
   res.send(`
     <!doctype html>
@@ -70,10 +73,13 @@ function renderAdmin(req, res) {
 
         <div class="box">
           <h3>QUẢN LÝ KEY</h3>
-          <div class="row">
-            <input type="number" id="key-days" placeholder="Số ngày (9999 = vĩnh viễn)" value="30">
-            <button onclick="createKey()">TẠO KEY MỚI</button>
-            <button class="btn-cyan" onclick="loadKeys()">TẢI LẠI</button>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+            <input type="text" id="custom-key" placeholder="Nhập tên Key tự chọn (VD: KEY-LEMINH). Bỏ trống để tự tạo ngẫu nhiên...">
+            <div class="row">
+              <input type="number" id="key-days" placeholder="Số ngày (9999 = vĩnh viễn)" value="30">
+              <button onclick="createKey()">TẠO KEY</button>
+              <button class="btn-cyan" onclick="loadKeys()">TẢI LẠI</button>
+            </div>
           </div>
           <table>
             <thead>
@@ -147,13 +153,20 @@ function renderAdmin(req, res) {
         async function createKey() {
           const pass = document.getElementById('admin-pass').value;
           const days = parseInt(document.getElementById('key-days').value);
-          if(!pass || isNaN(days)) return alert("Nhập đủ thông tin!");
+          const customKey = document.getElementById('custom-key').value.trim();
+          
+          if(!pass || isNaN(days)) return alert("Nhập đủ thông tin (Mật khẩu và Số ngày)!");
+          
           const res = await fetch(API_URL + '/api/admin/create', {
             method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ password: pass, days })
+            body: JSON.stringify({ password: pass, days, customKey })
           });
           const data = await res.json();
-          if(data.success) { alert("Tạo thành công!\\nKey: " + data.key); loadKeys(); } 
+          if(data.success) { 
+            alert("Tạo thành công!\\nKey: " + data.key); 
+            document.getElementById('custom-key').value = ""; // Reset ô nhập
+            loadKeys(); 
+          } 
           else alert(data.error);
         }
 
@@ -177,6 +190,9 @@ function renderAdmin(req, res) {
 app.get('/', renderAdmin);
 app.get('/admin', renderAdmin);
 
+// ==========================================
+// API QUẢN LÝ KEY
+// ==========================================
 app.post('/api/admin/keys', (req, res) => {
   const { password } = req.body;
   if (password !== ADMIN_PASS) return res.status(403).json({ error: "Sai mật khẩu" });
@@ -184,16 +200,32 @@ app.post('/api/admin/keys', (req, res) => {
 });
 
 app.post('/api/admin/create', (req, res) => {
-  const { password, days } = req.body;
+  const { password, days, customKey } = req.body;
   if (password !== ADMIN_PASS) return res.status(403).json({ error: "Sai mật khẩu" });
 
   const db = getDB();
-  const newKey = 'BON-' + crypto.randomBytes(4).toString('hex').toUpperCase() + '-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+  let newKey = customKey ? customKey.trim() : "";
+  
+  // Nếu không nhập customKey, tự động tạo ngẫu nhiên
+  if (!newKey) {
+    newKey = 'BON-' + crypto.randomBytes(4).toString('hex').toUpperCase() + '-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+  }
+
+  // Kiểm tra xem key đã tồn tại chưa
+  if (db.keys.find(k => k.key === newKey)) {
+    return res.json({ error: "Key này đã tồn tại, vui lòng nhập tên khác!" });
+  }
+
   db.keys.unshift({ 
-    key: newKey, days: days, created_at: Date.now(), 
-    activated_at: null, expires_at: null, device: null 
+    key: newKey, 
+    days: days, 
+    created_at: Date.now(), 
+    activated_at: null, 
+    expires_at: null, 
+    device: null 
   });
   saveDB(db);
+  
   res.json({ success: true, key: newKey });
 });
 
@@ -206,6 +238,9 @@ app.post('/api/admin/delete', (req, res) => {
   res.json({ success: true });
 });
 
+// ==========================================
+// API CẤU HÌNH (BẢO TRÌ)
+// ==========================================
 app.post('/api/config/get', (req, res) => res.json(getConfig()));
 
 app.post('/api/admin/config', (req, res) => {
@@ -215,7 +250,9 @@ app.post('/api/admin/config', (req, res) => {
   res.json({ success: true });
 });
 
-// XỬ LÝ KÍCH HOẠT (Bỏ check IP, chỉ check Thiết bị)
+// ==========================================
+// API CLIENT (KÍCH HOẠT)
+// ==========================================
 app.post('/api/activate', (req, res) => {
   const { key } = req.body;
   const db = getDB();
@@ -223,11 +260,10 @@ app.post('/api/activate', (req, res) => {
   
   if (!keyData) return res.json({ success: false, msg: "Key không tồn tại!" });
 
-  // Chỉ lấy User-Agent (Trình duyệt/Điện thoại) để làm Device ID, KHÔNG check IP
+  // Chỉ lấy User-Agent, KHÔNG check IP
   const clientDevice = req.headers['user-agent'];
 
   if (keyData.activated_at !== null) {
-    // Nếu key đã kích hoạt ở thiết bị khác
     if (keyData.device !== clientDevice) {
       return res.json({ success: false, msg: "Key này đã được sử dụng trên thiết bị khác!" });
     }
@@ -242,7 +278,6 @@ app.post('/api/activate', (req, res) => {
     });
   }
 
-  // Kích hoạt lần đầu
   const now = Date.now();
   const msInDay = 24 * 60 * 60 * 1000;
   const expires = keyData.days >= 9999 ? now + 100*365*msInDay : now + (keyData.days * msInDay);
