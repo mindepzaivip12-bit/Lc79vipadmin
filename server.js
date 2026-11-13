@@ -8,35 +8,38 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Tạo file database nếu chưa có
+// Khởi tạo file Database và Config
 const DB_FILE = path.join(__dirname, 'database.json');
-if (!fs.existsSync(DB_FILE)) {
-  fs.writeFileSync(DB_FILE, JSON.stringify({ keys: [] }));
-}
+const CONFIG_FILE = path.join(__dirname, 'config.json');
+
+if (!fs.existsSync(DB_FILE)) fs.writeFileSync(DB_FILE, JSON.stringify({ keys: [] }));
+if (!fs.existsSync(CONFIG_FILE)) fs.writeFileSync(CONFIG_FILE, JSON.stringify({ maintenance: false, custom_html: "" }));
 
 const getDB = () => JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
 const saveDB = (data) => fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+const getConfig = () => JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+const saveConfig = (data) => fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
 
-const ADMIN_PASS = "admin123"; // Bạn có thể đổi mật khẩu tại đây
+const ADMIN_PASS = "admin123"; // Đổi mật khẩu tại đây
 
 // ==========================================
-// 1. HIỂN THỊ GIAO DIỆN ADMIN TẠI TRANG CHỦ "/"
+// HÀM TRẢ VỀ GIAO DIỆN ADMIN (Dùng chung)
 // ==========================================
-app.get('/', (req, res) => {
+function renderAdmin(req, res) {
   res.send(`
     <!doctype html>
     <html lang="vi">
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>ADMIN - Quản Lý Tool</title>
+      <title>ADMIN - BON TOOL</title>
       <style>
         body { background: #090a0f; color: #fff; font-family: sans-serif; padding: 20px; }
         .container { max-width: 1000px; margin: auto; display: flex; flex-direction: column; gap: 20px; }
         .box { background: #13141f; padding: 20px; border-radius: 10px; border: 1px solid #05d9e8; }
         h2, h3 { color: #05d9e8; margin-top: 0; }
         input, textarea { padding: 10px; border-radius: 5px; border: 1px solid #05d9e8; background: #000; color: #fff; outline: none; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
-        textarea { resize: vertical; min-height: 100px; font-family: monospace; }
+        textarea { resize: vertical; min-height: 80px; font-family: monospace; }
         button { padding: 10px 15px; background: #ff2a6d; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         button:hover { opacity: 0.8; }
         .btn-cyan { background: #05d9e8; color: #000; }
@@ -47,13 +50,26 @@ app.get('/', (req, res) => {
         th, td { padding: 10px; border: 1px solid #333; text-align: left; font-size: 13px; }
         th { background: #000; color: #ff2a6d; }
         .status-ok { color: #55ff55; } .status-bad { color: #ff5555; }
+        .toggle-switch { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .toggle-switch input { width: 20px; height: 20px; cursor: pointer; margin: 0; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="box">
-          <h2>QUẢN LÝ TOOL - BON TOOL</h2>
+          <h2>QUẢN LÝ TOOL</h2>
           <input type="password" id="admin-pass" placeholder="Nhập mật khẩu Admin...">
+        </div>
+
+        <div class="box">
+          <h3>CẤU HÌNH TOOL</h3>
+          <div class="toggle-switch">
+            <input type="checkbox" id="cfg-maintenance">
+            <label for="cfg-maintenance" style="color:#ff2a6d; font-weight:bold;">BẬT CHẾ ĐỘ BẢO TRÌ (Tool sẽ ẩn)</label>
+          </div>
+          <label>Nhập HTML gốc (Thông báo, Banner, v.v.):</label>
+          <textarea id="cfg-html" placeholder="<h2>Thông báo quan trọng!</h2>"></textarea>
+          <button class="btn-cyan" onclick="saveConfig()">LƯU CẤU HÌNH</button>
         </div>
 
         <div class="box">
@@ -74,6 +90,29 @@ app.get('/', (req, res) => {
 
       <script>
         const API_URL = ""; // Chạy cùng server nên để trống
+
+        async function loadConfig() {
+          try {
+            const res = await fetch(API_URL + '/api/config/get', { method: 'POST' });
+            const data = await res.json();
+            document.getElementById('cfg-maintenance').checked = data.maintenance;
+            document.getElementById('cfg-html').value = data.custom_html || "";
+          } catch(e) {}
+        }
+
+        async function saveConfig() {
+          const pass = document.getElementById('admin-pass').value;
+          if(!pass) return alert("Nhập mật khẩu!");
+          const maintenance = document.getElementById('cfg-maintenance').checked;
+          const custom_html = document.getElementById('cfg-html').value;
+
+          const res = await fetch(API_URL + '/api/admin/config', {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: pass, maintenance, custom_html })
+          });
+          if(res.ok) alert("Lưu cấu hình thành công!");
+          else alert("Sai mật khẩu!");
+        }
 
         async function loadKeys() {
           const pass = document.getElementById('admin-pass').value;
@@ -133,14 +172,20 @@ app.get('/', (req, res) => {
           });
           loadKeys();
         }
+
+        window.onload = () => { loadConfig(); };
       </script>
     </body>
     </html>
   `);
-});
+}
+
+// Định tuyến cho cả trang chủ "/" và "/admin"
+app.get('/', renderAdmin);
+app.get('/admin', renderAdmin);
 
 // ==========================================
-// 2. API QUẢN LÝ KEY
+// API QUẢN LÝ KEY
 // ==========================================
 app.post('/api/admin/keys', (req, res) => {
   const { password } = req.body;
@@ -177,7 +222,21 @@ app.post('/api/admin/delete', (req, res) => {
 });
 
 // ==========================================
-// 3. API DÀNH CHO CLIENT (KÍCH HOẠT)
+// API CẤU HÌNH (BẢO TRÌ)
+// ==========================================
+app.post('/api/config/get', (req, res) => {
+  res.json(getConfig());
+});
+
+app.post('/api/admin/config', (req, res) => {
+  const { password, maintenance, custom_html } = req.body;
+  if (password !== ADMIN_PASS) return res.status(403).json({ error: "Sai mật khẩu" });
+  saveConfig({ maintenance, custom_html });
+  res.json({ success: true });
+});
+
+// ==========================================
+// API CLIENT (KÍCH HOẠT)
 // ==========================================
 app.post('/api/activate', (req, res) => {
   const { key } = req.body;
@@ -189,22 +248,11 @@ app.post('/api/activate', (req, res) => {
   const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
   const clientDevice = req.headers['user-agent'];
 
-  // Trường hợp 1: Key đã được kích hoạt trước đó
   if (keyData.activated_at !== null) {
-    // Kiểm tra IP
-    if (keyData.ip !== clientIP) {
-      return res.json({ success: false, msg: "Key đã bị khóa bởi IP khác!" });
-    }
-    // Kiểm tra Thiết bị
-    if (keyData.device !== clientDevice) {
-      return res.json({ success: false, msg: "Key đã bị khóa bởi thiết bị khác!" });
-    }
-    // Kiểm tra Hạn sử dụng
-    if (Date.now() > keyData.expires_at) {
-      return res.json({ success: false, msg: "Key đã hết hạn sử dụng!" });
-    }
+    if (keyData.ip !== clientIP) return res.json({ success: false, msg: "Key đã bị khóa bởi IP khác!" });
+    if (keyData.device !== clientDevice) return res.json({ success: false, msg: "Key đã bị khóa bởi thiết bị khác!" });
+    if (Date.now() > keyData.expires_at) return res.json({ success: false, msg: "Key đã hết hạn sử dụng!" });
     
-    // Hợp lệ -> Trả về thời gian
     return res.json({ 
       success: true, 
       expires_at: new Date(keyData.expires_at).toLocaleString("vi-VN"),
@@ -212,7 +260,6 @@ app.post('/api/activate', (req, res) => {
     });
   }
 
-  // Trường hợp 2: Key chưa dùng (Kích hoạt lần đầu)
   const now = Date.now();
   const msInDay = 24 * 60 * 60 * 1000;
   const expires = keyData.days >= 9999 ? now + 100*365*msInDay : now + (keyData.days * msInDay);
