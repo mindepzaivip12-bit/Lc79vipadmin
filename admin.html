@@ -19,8 +19,7 @@
   table { width: 100%; border-collapse: collapse; margin-top: 10px; }
   th, td { padding: 10px; border: 1px solid #333; text-align: left; font-size: 13px; }
   th { background: #000; color: #ff2a6d; }
-  .status-ok { color: #55ff55; }
-  .status-bad { color: #ff5555; }
+  .status-ok { color: #55ff55; } .status-bad { color: #ff5555; }
   .toggle-switch { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
   .toggle-switch input { width: 20px; height: 20px; cursor: pointer; }
 </style>
@@ -32,7 +31,6 @@
     <input type="password" id="admin-pass" placeholder="Nhập mật khẩu Admin...">
   </div>
 
-  <!-- CẤU HÌNH TOOL -->
   <div class="box">
     <h3>CẤU HÌNH TOOL</h3>
     <div class="toggle-switch">
@@ -44,7 +42,6 @@
     <button class="btn-cyan" onclick="saveConfig()">LƯU CẤU HÌNH</button>
   </div>
 
-  <!-- QUẢN LÝ KEY -->
   <div class="box">
     <h3>QUẢN LÝ KEY</h3>
     <div class="row">
@@ -64,10 +61,9 @@
 <script>
   const API_URL = "https://your-admin-server.onrender.com"; // SỬA LINK RENDER CỦA BẠN
 
-  // Load config khi mở trang
   async function loadConfig() {
     try {
-      const res = await fetch(`${API_URL}/api/config`);
+      const res = await fetch(`${API_URL}/api/config/get`, { method: 'POST' });
       const data = await res.json();
       document.getElementById('cfg-maintenance').checked = data.maintenance;
       document.getElementById('cfg-html').value = data.custom_html || "";
@@ -88,13 +84,17 @@
     else alert("Sai mật khẩu!");
   }
 
-  // Key logic
   async function loadKeys() {
     const pass = document.getElementById('admin-pass').value;
     if(!pass) return alert("Nhập mật khẩu!");
     try {
-      const res = await fetch(`${API_URL}/api/admin/keys`, { headers: { 'Authorization': pass } });
+      const res = await fetch(`${API_URL}/api/admin/keys`, { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass })
+      });
       if(res.status === 403) return alert("Sai mật khẩu!");
+      
       const keys = await res.json();
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = '';
