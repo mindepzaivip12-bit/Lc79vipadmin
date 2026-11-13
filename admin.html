@@ -2,81 +2,298 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<title>Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - BONTOOL</title>
 <style>
-    body { font-family: sans-serif; background: #111; color: #fff; padding: 20px; }
-    input, button { padding: 10px; margin: 5px 0; width: 100%; max-width: 300px; border-radius: 5px; border: none; }
-    button { background: #ff1a8c; color: white; cursor: pointer; font-weight: bold; }
-    .box { background: #222; padding: 20px; border-radius: 10px; margin-bottom: 20px; max-width: 400px; }
-    pre { background: #000; padding: 10px; overflow-x: auto; font-size: 12px; }
+    :root {
+        --pink: #ff2a6d;
+        --cyan: #05d9e8;
+        --bg: #0d0f17;
+        --panel: #131622;
+        --text: #fff;
+    }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh;}
+    
+    /* Tiêu đề */
+    h1 { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); text-align: center; margin-bottom: 20px; font-size: 24px; text-transform: uppercase; letter-spacing: 2px;}
+    
+    /* Khung chứa chung */
+    .card { 
+        background: var(--panel); border: 1px solid #2a2d3a; border-radius: 12px; 
+        padding: 20px; width: 100%; max-width: 600px; margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    .card h2 { color: var(--pink); font-size: 16px; margin-bottom: 15px; border-bottom: 1px solid #2a2d3a; padding-bottom: 10px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
+
+    /* Form nhập liệu */
+    input, select, button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 14px; outline: none; margin-bottom: 10px; }
+    input, select { background: #0a0b10; color: #fff; border: 1px solid #333; transition: 0.3s; }
+    input:focus, select:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(5, 217, 232, 0.3); }
+    
+    button { background: var(--pink); color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
+    button:hover { background: #e01f5a; transform: scale(1.02); }
+    button:disabled { background: #555; cursor: not-allowed; }
+    
+    .row { display: flex; gap: 10px; }
+    .row input { flex: 2; }
+    .row select { flex: 1.2; }
+
+    /* Nút Bảo Trì */
+    .btn-maintain { background: #ff3333; border: 1px solid #ff5555; }
+    .btn-maintain:hover { background: #cc0000; }
+    .btn-maintain.active { background: #555; border: 1px solid #777; color: #aaa; }
+    .btn-maintain.active:hover { background: #444; }
+
+    /* Danh sách Key */
+    .key-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding-right: 5px;}
+    .key-item { background: #0a0b10; border: 1px solid #222; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; transition: 0.3s;}
+    .key-item:hover { border-color: var(--cyan); }
+    
+    .key-header { display: flex; justify-content: space-between; align-items: center; }
+    .key-name { font-weight: bold; color: var(--cyan); font-size: 15px; letter-spacing: 1px; word-break: break-all;}
+    .key-price { font-size: 12px; background: rgba(255,42,109,0.2); color: var(--pink); padding: 3px 8px; border-radius: 10px; border: 1px solid var(--pink);}
+    
+    .key-info { font-size: 12px; color: #aaa; display: flex; flex-direction: column; gap: 4px; }
+    .key-info span { color: #fff; }
+    .expired { color: #ff5555 !important; font-weight: bold; }
+    .forever { color: #55ff55 !important; font-weight: bold; text-shadow: 0 0 5px #55ff55;}
+
+    /* Nút hành động trong key */
+    .key-actions { display: flex; gap: 8px; margin-top: 5px; }
+    .key-actions button { padding: 8px; font-size: 12px; margin: 0; border-radius: 5px; text-transform: none;}
+    .btn-reset { background: #f39c12; color: #000; }
+    .btn-reset:hover { background: #e67e22; }
+    .btn-delete { background: #c0392b; }
+    .btn-delete:hover { background: #e74c3c; }
+    
+    #msg { color: #55ff55; font-weight: bold; text-align: center; margin-bottom: 10px; min-height: 20px; text-shadow: 0 0 5px #55ff55; transition: 0.3s;}
+    #msg.error { color: #ff5555; text-shadow: 0 0 5px #ff5555;}
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--panel); }
+    ::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 10px; }
+    
+    .copy-btn { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); padding: 2px 8px; border-radius: 5px; font-size: 10px; cursor: pointer; margin-left: 10px; }
+    .copy-btn:hover { background: rgba(5, 217, 232, 0.2); }
 </style>
 </head>
 <body>
-    <h2>Quản Trị Hệ Thống</h2>
-    
-    <div class="box">
-        <h3>Bật/Tắt Bảo Trì</h3>
-        <button onclick="adminAction('toggle_maintenance')" id="btnMaintain">Đang tải...</button>
+
+    <h1>Quản Trị Hệ Thống</h1>
+    <div id="msg"></div>
+
+    <!-- Quản lý bảo trì -->
+    <div class="card">
+        <h2>Trạng Thái Server</h2>
+        <button onclick="adminAction('toggle_maintenance')" id="btnMaintain" class="btn-maintain">Đang tải trạng thái...</button>
     </div>
 
-    <div class="box">
-        <h3>Tạo Key VIP</h3>
-        <input type="text" id="keyName" placeholder="Nhập tên key (để trống tự tạo)">
-        <input type="number" id="keyDays" placeholder="Số ngày sử dụng" value="1">
-        <button onclick="createKey()">Tạo Key</button>
-        <p id="msg" style="color: #22c55e;"></p>
+    <!-- Tạo Key -->
+    <div class="card">
+        <h2>Tạo Key VIP Mới</h2>
+        <input type="text" id="keyName" placeholder="Tên Key (VD: VIP-ABC, để trống tự tạo)">
+        <div class="row">
+            <input type="number" id="keyAmount" placeholder="Số lượng" value="1" min="1">
+            <select id="keyUnit">
+                <option value="days">Ngày</option>
+                <option value="hours">Giờ</option>
+                <option value="minutes">Phút (Để test)</option>
+                <option value="forever">Vĩnh Viễn</option>
+            </select>
+        </div>
+        <button onclick="createKey()">Tạo Key Ngay</button>
     </div>
 
-    <div class="box">
-        <h3>Danh Sách Key</h3>
-        <button onclick="loadStatus()">Tải Lại</button>
-        <pre id="keyList">Đang tải...</pre>
+    <!-- Danh sách Key -->
+    <div class="card">
+        <h2>Danh Sách Key 
+            <button onclick="loadStatus()" style="width:auto; padding:5px 15px; font-size:12px; margin:0; background:transparent; border:1px solid var(--cyan); color:var(--cyan);">Tải Lại</button>
+        </h2>
+        <div class="key-list" id="keyList">
+            <p style="text-align:center; color:#888;">Đang tải dữ liệu...</p>
+        </div>
     </div>
 
 <script>
-    // Render sẽ tự hiểu API này
     const API_URL = '/api/admin';
-    const PASS = 'admin123'; // Khớp với server.js
+    const PASS = 'admin123'; // Mật khẩu (Phải khớp với server.js)
 
-    async function adminAction(action) {
-        const res = await fetch(API_URL, {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ password: PASS, action: action })
-        });
-        const data = await res.json();
-        alert(data.msg);
-        loadStatus();
+    // Hàm hiển thị thông báo
+    function showMsg(text, isError = false) {
+        const el = document.getElementById('msg');
+        el.innerText = text;
+        el.className = isError ? 'error' : '';
+        setTimeout(() => { el.innerText = ''; }, 3000);
     }
 
-    async function loadStatus() {
-        const res = await fetch(API_URL, {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ password: PASS, action: 'get_keys' })
-        });
-        const data = await res.json();
-        document.getElementById('btnMaintain').innerText = data.maintenance ? "TẮT BẢO TRÌ (Đang Bật)" : "BẬT BẢO TRÌ (Đang Tắt)";
-        
-        let html = "";
-        for (let k in data.keys) {
-            const exp = new Date(data.keys[k].expiresAt).toLocaleString('vi-VN');
-            html += `Key: ${k} | Hạn: ${exp} | IP: ${data.keys[k].ip || 'Chưa dùng'}\n`;
+    // Hàm gọi API chung
+    async function adminAction(action, extraData = {}) {
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ password: PASS, action: action, ...extraData })
+            });
+            return await res.json();
+        } catch(e) {
+            showMsg("Lỗi kết nối Server!", true);
+            return { success: false };
         }
-        document.getElementById('keyList').innerText = html || "Chưa có key nào";
     }
 
-    async function createKey() {
-        const key = document.getElementById('keyName').value;
-        const days = document.getElementById('keyDays').value;
-        const res = await fetch(API_URL, {
-            method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ password: PASS, action: 'create_key', key: key, days: days })
+    // Tải trạng thái và danh sách key
+    async function loadStatus() {
+        const data = await adminAction('get_keys');
+        if (!data.success) return;
+
+        // 1. Cập nhật nút bảo trì
+        const btnM = document.getElementById('btnMaintain');
+        if (data.maintenance) {
+            btnM.innerText = "🔴 ĐANG BẢO TRÌ (Bấm để TẮT)";
+            btnM.className = "btn-maintain active";
+        } else {
+            btnM.innerText = "🟢 HỆ THỐNG BÌNH THƯỜNG (Bấm để BẬT)";
+            btnM.className = "btn-maintain";
+        }
+        
+        // 2. Render danh sách key
+        const listEl = document.getElementById('keyList');
+        listEl.innerHTML = ''; // Xóa cũ
+        
+        const keys = data.keys;
+        const keyNames = Object.keys(keys);
+
+        if (keyNames.length === 0) {
+            listEl.innerHTML = '<p style="text-align:center; color:#888; padding: 20px 0;">Chưa có Key nào được tạo.</p>';
+            return;
+        }
+
+        // Đảo ngược mảng để key mới tạo hiện lên đầu
+        keyNames.reverse().forEach(k => {
+            const item = keys[k];
+            let timeStr = "";
+            let isExpired = false;
+            let priceBadge = "";
+
+            if (item.expiresAt === "forever") {
+                timeStr = `<span class="forever">Vĩnh Viễn</span>`;
+                priceBadge = `<span class="key-price" style="color:#55ff55; border-color:#55ff55; background:rgba(85,255,85,0.1)">VĨNH VIỄN</span>`;
+            } else {
+                const expDate = new Date(item.expiresAt);
+                timeStr = expDate.toLocaleString('vi-VN');
+                if (Date.now() > item.expiresAt) {
+                    timeStr = `<span class="expired">${timeStr} (Đã hết hạn)</span>`;
+                    isExpired = true;
+                }
+            }
+
+            const ipStr = item.ip ? `<span style="color:#f39c12">${item.ip}</span>` : `<span style="color:#55ff55">Chưa khóa</span>`;
+
+            const html = `
+                <div class="key-item">
+                    <div class="key-header">
+                        <div class="key-name">${k} <button class="copy-btn" onclick="copyText('${k}')">Copy</button></div>
+                        ${priceBadge}
+                    </div>
+                    <div class="key-info">
+                        <div>Hạn sử dụng: ${timeStr}</div>
+                        <div>IP đã khóa: ${ipStr}</div>
+                    </div>
+                    <div class="key-actions">
+                        <button class="btn-reset" onclick="resetIP('${k}')">Reset IP</button>
+                        <button class="btn-delete" onclick="deleteKey('${k}')">Xóa Key</button>
+                    </div>
+                </div>
+            `;
+            listEl.innerHTML += html;
         });
-        const data = await res.json();
-        document.getElementById('msg').innerText = data.msg + ": " + (data.key || '');
-        loadStatus();
     }
 
-    loadStatus();
+    // Bật / Tắt bảo trì
+    async function adminAction(action) {
+        if (action === 'toggle_maintenance') {
+            const data = await fetchAPI('toggle_maintenance');
+            if (data.success) {
+                showMsg(data.msg);
+                loadStatus(); // Load lại giao diện
+            }
+        }
+    }
+
+    // Tạo Key
+    async function createKey() {
+        const keyInput = document.getElementById('keyName').value;
+        const amount = document.getElementById('keyAmount').value;
+        const unit = document.getElementById('keyUnit').value;
+        
+        const btn = document.querySelector('button[onclick="createKey()"]');
+        btn.innerText = "ĐANG TẠO...";
+        btn.disabled = true;
+
+        const data = await fetchAPI('create_key', { key: keyInput, amount: amount, unit: unit });
+        
+        btn.innerText = "Tạo Key Ngay";
+        btn.disabled = false;
+
+        if (data.success) {
+            showMsg(`Tạo thành công: ${data.key}`);
+            document.getElementById('keyName').value = ''; // Xóa ô nhập
+            loadStatus(); // Load lại danh sách
+        } else {
+            showMsg(data.msg, true);
+        }
+    }
+
+    // Reset IP
+    async function resetIP(key) {
+        if (!confirm(`Bạn có chắc muốn Reset IP cho key: ${key}?`)) return;
+        const data = await fetchAPI('reset_ip', { key: key });
+        if (data.success) {
+            showMsg(data.msg);
+            loadStatus();
+        } else {
+            showMsg(data.msg, true);
+        }
+    }
+
+    // Xóa Key
+    async function deleteKey(key) {
+        if (!confirm(`CẢNH BÁO: Bạn có chắc muốn XÓA VĨNH VIỄN key: ${key}?`)) return;
+        const data = await fetchAPI('delete_key', { key: key });
+        if (data.success) {
+            showMsg(data.msg);
+            loadStatus();
+        } else {
+            showMsg(data.msg, true);
+        }
+    }
+
+    // Hàm gọi API chung (viết lại cho gọn)
+    async function fetchAPI(action, extraData = {}) {
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ password: PASS, action: action, ...extraData })
+            });
+            return await res.json();
+        } catch(e) {
+            return { success: false, msg: "Lỗi kết nối Server!" };
+        }
+    }
+
+    // Copy text
+    function copyText(text) {
+        navigator.clipboard.writeText(text);
+        showMsg("Đã copy key!");
+    }
+
+    // Chạy khi load trang
+    window.onload = () => {
+        loadStatus();
+    };
 </script>
 </body>
 </html>
