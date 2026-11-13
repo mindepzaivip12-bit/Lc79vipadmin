@@ -1,122 +1,117 @@
 const express = require('express');
 const cors = require('cors');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(cors());
 app.use(express.json());
+app.use(cors()); 
 
+// Lưu trữ tạm bằng file JSON (khi deploy thật nên dùng MongoDB)
 const DB_FILE = path.join(__dirname, 'database.json');
-
-// Khởi tạo Database nếu chưa có
-if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify({ maintenance: false, keys: {} }, null, 2));
-}
+if (!fs.existsSync(DB_FILE)) fs.writeFileSync(DB_FILE, JSON.stringify({ keys: [] }));
 
 const getDB = () => JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
 const saveDB = (data) => fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 
-// Lấy IP thực của người dùng
-const getClientIp = (req) => {
-    let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    if (ip && ip.includes(',')) ip = ip.split(',')[0]; 
-    return ip ? ip.trim() : 'unknown';
-};
+const ADMIN_PASS = "admin123"; // Đổi mật khẩu này
 
-// ==========================================
-// TỰ ĐỘNG CHUYỂN HƯỚNG TRANG CHỦ SANG ADMIN
-// ==========================================
-app.get('/', (req, res) => {
-    res.redirect('/admin');
+// API ADMIN: Lấy danh sách key
+app.get('/api/admin/keys', (req, res) => {
+  const pass = req.headers['authorization'];
+  if (pass !== ADMIN_PASS) return res.status(403).json({ error: "Sai mật khẩu" });
+  const db = getDB();
+  res.json(db.keys);
 });
 
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
+// API ADMIN: Tạo key mới
+app.post('/api/admin/create', (req, res) => {
+  const { password, days } = req.body;
+  if (password !== ADMIN_PASS) return res.status(403).json({ error: "Sai mật khẩu" });
+
+  const db = getDB();
+  const newKey = 'NX-' + crypto.randomBytes(6).toString('hex').toUpperCase();
+  
+  db.keys.unshift({
+    key: newKey,
+    days: days, // Số ngày (9999 = vĩnh viễn)
+    created_at: Date.now(),
+    activated_at: null,
+    expires_at: null,
+    ip: null,
+    device: null
+  });
+  
+  saveDB(db);
+  res.json({ success: true, key: newKey });
 });
 
-// ==========================================
-// CÁC API CHO WEB CHÍNH
-// ==========================================
-
-app.get('/api/status', (req, res) => {
-    const db = getDB();
-    res.json({ maintenance: db.maintenance });
+// API ADMIN: Xóa key
+app.post('/api/admin/delete', (req, res) => {
+  const { password, key } = req.body;
+  if (password !== ADMIN_PASS) return res.status(403).json({ error: "Sai mật khẩu" });
+  const db = getDB();
+  db.keys = db.keys.filter(k => k.key !== key);
+  saveDB(db);
+  res.json({ success: true });
 });
 
+// API CLIENT: Kích hoạt key
 app.post('/api/activate', (req, res) => {
-    const { key } = req.body;
-    const clientIp = getClientIp(req);
-    const db = getDB();
+  const { key } = req.body;
+  const db = getDB();
+  const keyData = db.keys.find(k => k.key === key);
 
-    if (db.maintenance) {
-        return res.json({ success: false, msg: "Hệ thống đang bảo trì!" });
-    }
+  if (!keyData) return res.json({ success: false, message: "Key không tồn tại!" });
 
-    const keyData = db.keys[key];
-    if (!keyData) return res.json({ success: false, msg: "Key không hợp lệ!" });
-    if (Date.now() > keyData.expiresAt) return res.json({ success: false, msg: "Key đã hết hạn!" });
-    
-    if (keyData.ip && keyData.ip !== clientIp) {
-        return res.json({ success: false, msg: "Key này đã bị khóa vào IP khác!" });
-    }
+  // Lấy IP thật (sau proxy Render)
+  const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const clientDevice = req.headers['user-agent'];
 
-    if (!keyData.ip) {
-        db.keys[key].ip = clientIp;
-        saveDB(db);
-    }
+  if (keyData.activated_at !== null) {
+    if (keyData.ip !== clientIP) return res.json({ success: false, message: "Key đã bị khóa bởi IP khác!" });
+    if (keyData.device !== clientDevice) return res.json({ success: false, message: "Key đã bị khóa bởi thiết bị khác!" });
+    return res.json({ success: true, message: "Đăng nhập thành công", expires_at: new Date(keyData.expires_at).toLocaleString("vi-VN") });
+  }
 
-    res.json({ success: true, msg: "Kích hoạt thành công!" });
+  // Kích hoạt lần đầu -> Bắt đầu tính giờ
+  const now = Date.now();
+  const msInDay = 24 * 60 * 60 * 1000;
+  const expires = daysCheck(keyData.days) ? now + (keyData.days * msInDay) : now + 100 * 365 * msInDay;
+
+  keyData.activated_at = now;
+  keyData.expires_at = expires;
+  keyData.ip = clientIP;
+  keyData.device = clientDevice;
+
+  saveDB(db);
+  res.json({ success: true, message: "Kích hoạt thành công!", expires_at: new Date(expires).toLocaleString("vi-VN") });
 });
 
+function daysCheck(days) { return days > 0 && days < 9999; }
 
-// ==========================================
-// API DÀNH CHO TRANG ADMIN
-// ==========================================
-const ADMIN_PASS = "admin123"; // Mật khẩu Admin
+// API CLIENT: Check xem key còn hạn không (Gọi khi load trang)
+app.post('/api/check', (req, res) => {
+  const { key } = req.body;
+  const db = getDB();
+  const keyData = db.keys.find(k => k.key === key);
 
-app.post('/api/admin', (req, res) => {
-    const { password, action, key, amount, unit } = req.body;
-    if (password !== ADMIN_PASS) return res.status(403).json({ success: false, msg: "Sai mật khẩu!" });
-    
-    const db = getDB();
+  if (!keyData) return res.json({ valid: false, message: "Key không tồn tại" });
+  if (keyData.activated_at === null) return res.json({ valid: false, message: "Key chưa kích hoạt" });
 
-    // Bật / Tắt bảo trì
-    if (action === 'toggle_maintenance') {
-        db.maintenance = !db.maintenance;
-        saveDB(db);
-        return res.json({ success: true, msg: `Bảo trì đã ${db.maintenance ? 'BẬT' : 'TẮT'}` });
-    }
+  const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const clientDevice = req.headers['user-agent'];
 
-    // Tạo Key mới (Hỗ trợ Ngày / Giờ / Phút)
-    if (action === 'create_key') {
-        const newKey = key || "VIP-" + Math.random().toString(36).substring(2, 10).toUpperCase();
-        
-        // Tính toán thời gian an toàn
-        const numAmount = parseInt(amount) || 1; // Nếu không nhập thì mặc định là 1
-        let msPerUnit = 24 * 60 * 60 * 1000; // Mặc định là Ngày
-        
-        if (unit === 'hours') msPerUnit = 60 * 60 * 1000;
-        if (unit === 'minutes') msPerUnit = 60 * 1000;
+  if (keyData.ip !== clientIP || keyData.device !== clientDevice) {
+    return res.json({ valid: false, message: "Thiết bị/IP không khớp!" });
+  }
 
-        const durationMs = numAmount * msPerUnit;
+  if (Date.now() > keyData.expires_at) {
+    return res.json({ valid: false, message: "Key đã hết hạn!" });
+  }
 
-        db.keys[newKey] = {
-            expiresAt: Date.now() + durationMs,
-            ip: null
-        };
-        saveDB(db);
-        return res.json({ success: true, msg: "Tạo key thành công", key: newKey });
-    }
-
-    // Lấy danh sách Key
-    if (action === 'get_keys') {
-        return res.json({ success: true, keys: db.keys, maintenance: db.maintenance });
-    }
+  res.json({ valid: true, expires_at: new Date(keyData.expires_at).toLocaleString("vi-VN") });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server đang chạy tại port ${PORT}`);
-});
+app.listen(3000, () => console.log('Server chạy tại port 3000'));
