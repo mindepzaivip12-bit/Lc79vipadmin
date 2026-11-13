@@ -8,7 +8,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Khởi tạo file Database và Config
 const DB_FILE = path.join(__dirname, 'database.json');
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 
@@ -20,11 +19,8 @@ const saveDB = (data) => fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2)
 const getConfig = () => JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
 const saveConfig = (data) => fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
 
-const ADMIN_PASS = "admin123"; // Đổi mật khẩu tại đây
+const ADMIN_PASS = "admin123"; 
 
-// ==========================================
-// HÀM TRẢ VỀ GIAO DIỆN ADMIN (Dùng chung)
-// ==========================================
 function renderAdmin(req, res) {
   res.send(`
     <!doctype html>
@@ -65,9 +61,9 @@ function renderAdmin(req, res) {
           <h3>CẤU HÌNH TOOL</h3>
           <div class="toggle-switch">
             <input type="checkbox" id="cfg-maintenance">
-            <label for="cfg-maintenance" style="color:#ff2a6d; font-weight:bold;">BẬT CHẾ ĐỘ BẢO TRÌ (Tool sẽ ẩn)</label>
+            <label for="cfg-maintenance" style="color:#ff2a6d; font-weight:bold;">BẬT CHẾ ĐỘ BẢO TRÌ</label>
           </div>
-          <label>Nhập HTML gốc (Thông báo, Banner, v.v.):</label>
+          <label>Nhập HTML gốc (Thông báo):</label>
           <textarea id="cfg-html" placeholder="<h2>Thông báo quan trọng!</h2>"></textarea>
           <button class="btn-cyan" onclick="saveConfig()">LƯU CẤU HÌNH</button>
         </div>
@@ -81,7 +77,7 @@ function renderAdmin(req, res) {
           </div>
           <table>
             <thead>
-              <tr><th>Key</th><th>Thời Hạn</th><th>Hết Hạn</th><th>IP / Thiết bị</th><th>Trạng Thái</th><th>Xóa</th></tr>
+              <tr><th>Key</th><th>Thời Hạn</th><th>Hết Hạn</th><th>Thiết bị</th><th>Trạng Thái</th><th>Xóa</th></tr>
             </thead>
             <tbody id="table-body"></tbody>
           </table>
@@ -89,7 +85,7 @@ function renderAdmin(req, res) {
       </div>
 
       <script>
-        const API_URL = ""; // Chạy cùng server nên để trống
+        const API_URL = ""; 
 
         async function loadConfig() {
           try {
@@ -110,8 +106,7 @@ function renderAdmin(req, res) {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ password: pass, maintenance, custom_html })
           });
-          if(res.ok) alert("Lưu cấu hình thành công!");
-          else alert("Sai mật khẩu!");
+          if(res.ok) alert("Lưu thành công!"); else alert("Sai mật khẩu!");
         }
 
         async function loadKeys() {
@@ -119,8 +114,7 @@ function renderAdmin(req, res) {
           if(!pass) return alert("Nhập mật khẩu!");
           try {
             const res = await fetch(API_URL + '/api/admin/keys', { 
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ password: pass })
             });
             if(res.status === 403) return alert("Sai mật khẩu!");
@@ -133,7 +127,7 @@ function renderAdmin(req, res) {
               const status = !k.activated_at ? '<span style="color:#aaa">Chưa dùng</span>' 
                            : isExpired ? '<span class="status-bad">Hết hạn</span>' 
                            : '<span class="status-ok">Hoạt động</span>';
-              const device = k.ip ? k.ip + '<br><small>' + (k.device ? k.device.substring(0, 20) : '') + '...</small>' : '---';
+              const device = k.device ? k.device.substring(0, 20) + '...' : '---';
               const expDate = k.expires_at ? new Date(k.expires_at).toLocaleString("vi-VN") : '---';
               
               tbody.innerHTML += \`
@@ -180,13 +174,9 @@ function renderAdmin(req, res) {
   `);
 }
 
-// Định tuyến cho cả trang chủ "/" và "/admin"
 app.get('/', renderAdmin);
 app.get('/admin', renderAdmin);
 
-// ==========================================
-// API QUẢN LÝ KEY
-// ==========================================
 app.post('/api/admin/keys', (req, res) => {
   const { password } = req.body;
   if (password !== ADMIN_PASS) return res.status(403).json({ error: "Sai mật khẩu" });
@@ -200,13 +190,8 @@ app.post('/api/admin/create', (req, res) => {
   const db = getDB();
   const newKey = 'BON-' + crypto.randomBytes(4).toString('hex').toUpperCase() + '-' + crypto.randomBytes(4).toString('hex').toUpperCase();
   db.keys.unshift({ 
-    key: newKey, 
-    days: days, 
-    created_at: Date.now(), 
-    activated_at: null, 
-    expires_at: null, 
-    ip: null, 
-    device: null 
+    key: newKey, days: days, created_at: Date.now(), 
+    activated_at: null, expires_at: null, device: null 
   });
   saveDB(db);
   res.json({ success: true, key: newKey });
@@ -221,12 +206,7 @@ app.post('/api/admin/delete', (req, res) => {
   res.json({ success: true });
 });
 
-// ==========================================
-// API CẤU HÌNH (BẢO TRÌ)
-// ==========================================
-app.post('/api/config/get', (req, res) => {
-  res.json(getConfig());
-});
+app.post('/api/config/get', (req, res) => res.json(getConfig()));
 
 app.post('/api/admin/config', (req, res) => {
   const { password, maintenance, custom_html } = req.body;
@@ -235,9 +215,7 @@ app.post('/api/admin/config', (req, res) => {
   res.json({ success: true });
 });
 
-// ==========================================
-// API CLIENT (KÍCH HOẠT)
-// ==========================================
+// XỬ LÝ KÍCH HOẠT (Bỏ check IP, chỉ check Thiết bị)
 app.post('/api/activate', (req, res) => {
   const { key } = req.body;
   const db = getDB();
@@ -245,13 +223,17 @@ app.post('/api/activate', (req, res) => {
   
   if (!keyData) return res.json({ success: false, msg: "Key không tồn tại!" });
 
-  const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  // Chỉ lấy User-Agent (Trình duyệt/Điện thoại) để làm Device ID, KHÔNG check IP
   const clientDevice = req.headers['user-agent'];
 
   if (keyData.activated_at !== null) {
-    if (keyData.ip !== clientIP) return res.json({ success: false, msg: "Key đã bị khóa bởi IP khác!" });
-    if (keyData.device !== clientDevice) return res.json({ success: false, msg: "Key đã bị khóa bởi thiết bị khác!" });
-    if (Date.now() > keyData.expires_at) return res.json({ success: false, msg: "Key đã hết hạn sử dụng!" });
+    // Nếu key đã kích hoạt ở thiết bị khác
+    if (keyData.device !== clientDevice) {
+      return res.json({ success: false, msg: "Key này đã được sử dụng trên thiết bị khác!" });
+    }
+    if (Date.now() > keyData.expires_at) {
+      return res.json({ success: false, msg: "Key đã hết hạn sử dụng!" });
+    }
     
     return res.json({ 
       success: true, 
@@ -260,13 +242,13 @@ app.post('/api/activate', (req, res) => {
     });
   }
 
+  // Kích hoạt lần đầu
   const now = Date.now();
   const msInDay = 24 * 60 * 60 * 1000;
   const expires = keyData.days >= 9999 ? now + 100*365*msInDay : now + (keyData.days * msInDay);
   
   keyData.activated_at = now; 
   keyData.expires_at = expires; 
-  keyData.ip = clientIP; 
   keyData.device = clientDevice;
   
   saveDB(db);
