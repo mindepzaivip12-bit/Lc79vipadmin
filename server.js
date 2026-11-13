@@ -5,13 +5,18 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-app.use(express.json());
-app.use(cors()); 
+
+// CẤU HÌNH CORS ĐỂ FIX LỖI GET/POST TỪ VERCEL
+app.use(cors({
+  origin: '*', 
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(express.json()); 
 
 const DB_FILE = path.join(__dirname, 'database.json');
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 
-// Khởi tạo file nếu chưa có
 if (!fs.existsSync(DB_FILE)) fs.writeFileSync(DB_FILE, JSON.stringify({ keys: [] }));
 if (!fs.existsSync(CONFIG_FILE)) fs.writeFileSync(CONFIG_FILE, JSON.stringify({ maintenance: false, custom_html: "" }));
 
@@ -20,12 +25,12 @@ const saveDB = (data) => fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2)
 const getConfig = () => JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
 const saveConfig = (data) => fs.writeFileSync(CONFIG_FILE, JSON.stringify(data, null, 2));
 
-const ADMIN_PASS = "admin123"; // Mật khẩu Admin
+const ADMIN_PASS = "admin123"; 
 
 // ==========================================
-// API CẤU HÌNH (BẢO TRÌ & HTML)
+// API CẤU HÌNH (Dùng POST để tránh lỗi cache CORS)
 // ==========================================
-app.get('/api/config', (req, res) => {
+app.post('/api/config/get', (req, res) => {
   res.json(getConfig());
 });
 
@@ -37,10 +42,11 @@ app.post('/api/admin/config', (req, res) => {
 });
 
 // ==========================================
-// API ADMIN QUẢN LÝ KEY
+// API ADMIN QUẢN LÝ KEY (FIX LỖI GET -> POST)
 // ==========================================
-app.get('/api/admin/keys', (req, res) => {
-  if (req.headers['authorization'] !== ADMIN_PASS) return res.status(403).json({ error: "Sai mật khẩu" });
+app.post('/api/admin/keys', (req, res) => {
+  const { password } = req.body;
+  if (password !== ADMIN_PASS) return res.status(403).json({ error: "Sai mật khẩu" });
   res.json(getDB().keys);
 });
 
