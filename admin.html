@@ -8,188 +8,504 @@
     :root {
         --pink: #ff2a6d;
         --cyan: #05d9e8;
-        --bg: #0d0f17;
-        --panel: #131622;
-        --text: #fff;
+        --purple: #b537f2;
+        --bg: #0a0c13;
+        --panel: #11131f;
+        --panel-hover: #181b2b;
+        --text: #f0f2ff;
+        --text-dim: #8b8fa8;
+        --border: #232738;
+        --success: #2ed573;
+        --danger: #ff4757;
+        --warning: #ffa502;
+        --glow-cyan: 0 0 15px rgba(5, 217, 232, 0.4);
+        --glow-pink: 0 0 15px rgba(255, 42, 109, 0.4);
     }
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh;}
+    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
+    
+    body { 
+        background: var(--bg); 
+        color: var(--text); 
+        padding: 30px 20px; 
+        display: flex; 
+        flex-direction: column; 
+        align-items: center; 
+        min-height: 100vh;
+        background-image: 
+            radial-gradient(circle at 10% 10%, rgba(5, 217, 232, 0.05) 0%, transparent 40%),
+            radial-gradient(circle at 90% 90%, rgba(255, 42, 109, 0.05) 0%, transparent 40%);
+        background-attachment: fixed;
+    }
     
     /* Tiêu đề */
-    h1 { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); text-align: center; margin-bottom: 20px; font-size: 24px; text-transform: uppercase; letter-spacing: 2px;}
+    .header { text-align: center; margin-bottom: 30px; }
+    h1 { 
+        color: var(--cyan); 
+        text-shadow: var(--glow-cyan); 
+        font-size: 28px; 
+        text-transform: uppercase; 
+        letter-spacing: 4px;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+    .subtitle { color: var(--text-dim); font-size: 13px; letter-spacing: 2px; }
+    .subtitle span { color: var(--pink); text-shadow: var(--glow-pink); }
     
     /* Khung chứa chung */
     .card { 
-        background: var(--panel); border: 1px solid #2a2d3a; border-radius: 12px; 
-        padding: 20px; width: 100%; max-width: 600px; margin-bottom: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        background: var(--panel); 
+        border: 1px solid var(--border); 
+        border-radius: 16px; 
+        padding: 24px; 
+        width: 100%; 
+        max-width: 680px; 
+        margin-bottom: 20px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+        transition: 0.3s;
     }
-    .card h2 { color: var(--pink); font-size: 16px; margin-bottom: 15px; border-bottom: 1px solid #2a2d3a; padding-bottom: 10px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;}
+    .card:hover { border-color: rgba(5, 217, 232, 0.3); }
+    .card h2 { 
+        color: var(--pink); 
+        font-size: 14px; 
+        margin-bottom: 18px; 
+        border-bottom: 1px solid var(--border); 
+        padding-bottom: 12px; 
+        text-transform: uppercase; 
+        letter-spacing: 2px;
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        font-weight: 700;
+    }
 
     /* Form nhập liệu */
-    input, select, button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-size: 14px; outline: none; margin-bottom: 10px; }
-    input, select { background: #0a0b10; color: #fff; border: 1px solid #333; transition: 0.3s; }
-    input:focus, select:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(5, 217, 232, 0.3); }
+    input, select, button { 
+        width: 100%; 
+        padding: 13px 16px; 
+        border-radius: 10px; 
+        border: none; 
+        font-size: 14px; 
+        outline: none; 
+        margin-bottom: 12px; 
+        font-family: inherit;
+    }
+    input, select { 
+        background: #0a0b12; 
+        color: #fff; 
+        border: 1px solid var(--border); 
+        transition: 0.3s; 
+    }
+    input:focus, select:focus { 
+        border-color: var(--cyan); 
+        box-shadow: 0 0 12px rgba(5, 217, 232, 0.2); 
+    }
+    input::placeholder { color: #555a75; }
     
-    button { background: var(--pink); color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
-    button:hover { background: #e01f5a; transform: scale(1.02); }
-    button:disabled { background: #555; cursor: not-allowed; }
+    button { 
+        background: linear-gradient(135deg, var(--pink), var(--purple)); 
+        color: #fff; 
+        font-weight: 700; 
+        cursor: pointer; 
+        transition: 0.2s; 
+        text-transform: uppercase; 
+        letter-spacing: 1px;
+        border: none;
+        font-size: 13px;
+    }
+    button:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 6px 20px rgba(255, 42, 109, 0.4);
+    }
+    button:active { transform: translateY(0); }
+    button:disabled { background: #333; cursor: not-allowed; transform: none; box-shadow: none; }
     
-    .row { display: flex; gap: 10px; }
+    .row { display: flex; gap: 12px; }
     .row input { flex: 2; }
     .row select { flex: 1.2; }
 
-    /* Nút Bảo Trì */
-    .btn-maintain { background: #ff3333; border: 1px solid #ff5555; }
-    .btn-maintain:hover { background: #cc0000; }
-    .btn-maintain.active { background: #555; border: 1px solid #777; color: #aaa; }
-    .btn-maintain.active:hover { background: #444; }
-
     /* Danh sách Key */
-    .key-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding-right: 5px;}
-    .key-item { background: #0a0b10; border: 1px solid #222; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; transition: 0.3s;}
-    .key-item:hover { border-color: var(--cyan); }
+    .key-list { display: flex; flex-direction: column; gap: 12px; max-height: 500px; overflow-y: auto; padding-right: 6px;}
+    .key-item { 
+        background: #0a0b12; 
+        border: 1px solid var(--border); 
+        border-radius: 12px; 
+        padding: 16px; 
+        display: flex; 
+        flex-direction: column; 
+        gap: 10px; 
+        transition: 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+    .key-item::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 3px;
+        background: linear-gradient(180deg, var(--cyan), var(--pink));
+        opacity: 0.7;
+    }
+    .key-item:hover { 
+        border-color: rgba(5, 217, 232, 0.5); 
+        background: var(--panel-hover);
+        transform: translateX(3px);
+    }
     
-    .key-header { display: flex; justify-content: space-between; align-items: center; }
-    .key-name { font-weight: bold; color: var(--cyan); font-size: 15px; letter-spacing: 1px; word-break: break-all;}
-    .key-price { font-size: 12px; background: rgba(255,42,109,0.2); color: var(--pink); padding: 3px 8px; border-radius: 10px; border: 1px solid var(--pink);}
+    .key-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .key-name { 
+        font-weight: 700; 
+        color: var(--cyan); 
+        font-size: 15px; 
+        letter-spacing: 1px; 
+        word-break: break-all;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .key-price { 
+        font-size: 11px; 
+        background: rgba(255,42,109,0.15); 
+        color: var(--pink); 
+        padding: 4px 10px; 
+        border-radius: 20px; 
+        border: 1px solid rgba(255,42,109,0.4);
+        font-weight: 700;
+        white-space: nowrap;
+    }
     
-    .key-info { font-size: 12px; color: #aaa; display: flex; flex-direction: column; gap: 4px; }
-    .key-info span { color: #fff; }
-    .expired { color: #ff5555 !important; font-weight: bold; }
-    .forever { color: #55ff55 !important; font-weight: bold; text-shadow: 0 0 5px #55ff55;}
+    .key-info { 
+        font-size: 12px; 
+        color: var(--text-dim); 
+        display: flex; 
+        flex-direction: column; 
+        gap: 6px; 
+        background: rgba(0,0,0,0.3);
+        padding: 10px 12px;
+        border-radius: 8px;
+    }
+    .key-info > div { display: flex; align-items: center; gap: 8px; }
+    .key-info .label { color: var(--text-dim); min-width: 100px; }
+    .key-info .value { color: #fff; font-weight: 500; }
+    .expired { color: var(--danger) !important; font-weight: 700; }
+    .forever { 
+        color: var(--success) !important; 
+        font-weight: 700; 
+        text-shadow: 0 0 8px rgba(46, 213, 115, 0.5);
+    }
+    .ip-active { color: var(--warning); font-family: 'Courier New', monospace; }
+    .ip-free { color: var(--success); }
 
     /* Nút hành động trong key */
-    .key-actions { display: flex; gap: 8px; margin-top: 5px; }
-    .key-actions button { padding: 8px; font-size: 12px; margin: 0; border-radius: 5px; text-transform: none;}
-    .btn-reset { background: #f39c12; color: #000; }
-    .btn-reset:hover { background: #e67e22; }
-    .btn-delete { background: #c0392b; }
-    .btn-delete:hover { background: #e74c3c; }
+    .key-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .key-actions button { 
+        padding: 9px 12px; 
+        font-size: 12px; 
+        margin: 0; 
+        border-radius: 8px; 
+        text-transform: none;
+        flex: 1;
+        letter-spacing: 0.3px;
+    }
+    .btn-reset { background: rgba(255, 165, 2, 0.15); color: var(--warning); border: 1px solid rgba(255,165,2,0.4); }
+    .btn-reset:hover { background: var(--warning); color: #000; box-shadow: 0 4px 15px rgba(255,165,2,0.4); }
+    .btn-delete { background: rgba(255, 71, 87, 0.15); color: var(--danger); border: 1px solid rgba(255,71,87,0.4); }
+    .btn-delete:hover { background: var(--danger); color: #fff; box-shadow: 0 4px 15px rgba(255,71,87,0.4); }
     
-    #msg { color: #55ff55; font-weight: bold; text-align: center; margin-bottom: 10px; min-height: 20px; text-shadow: 0 0 5px #55ff55; transition: 0.3s;}
-    #msg.error { color: #ff5555; text-shadow: 0 0 5px #ff5555;}
+    /* Thông báo */
+    #msg { 
+        color: var(--success); 
+        font-weight: 700; 
+        text-align: center; 
+        margin-bottom: 15px; 
+        min-height: 22px; 
+        text-shadow: 0 0 8px rgba(46, 213, 115, 0.5); 
+        transition: 0.3s;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+    }
+    #msg.error { color: var(--danger); text-shadow: 0 0 8px rgba(255, 71, 87, 0.5); }
 
     /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--panel); }
-    ::-webkit-scrollbar-thumb { background: var(--pink); border-radius: 10px; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--cyan), var(--pink)); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--pink); }
     
-    .copy-btn { background: transparent; border: 1px solid var(--cyan); color: var(--cyan); padding: 2px 8px; border-radius: 5px; font-size: 10px; cursor: pointer; margin-left: 10px; }
-    .copy-btn:hover { background: rgba(5, 217, 232, 0.2); }
+    .copy-btn { 
+        background: transparent; 
+        border: 1px solid var(--cyan); 
+        color: var(--cyan); 
+        padding: 3px 10px; 
+        border-radius: 6px; 
+        font-size: 10px; 
+        cursor: pointer; 
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: 0.2s;
+    }
+    .copy-btn:hover { background: rgba(5, 217, 232, 0.2); box-shadow: 0 0 10px rgba(5,217,232,0.3); }
+
+    /* Trạng thái trống */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-dim);
+    }
+    .empty-state .icon { font-size: 40px; margin-bottom: 10px; opacity: 0.5; }
+
+    /* Loading */
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 30px;
+        gap: 10px;
+        color: var(--text-dim);
+    }
+    .spinner {
+        width: 20px; height: 20px;
+        border: 2px solid var(--border);
+        border-top-color: var(--cyan);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Refresh button */
+    .btn-refresh {
+        width: auto; 
+        padding: 6px 16px; 
+        font-size: 11px; 
+        margin: 0; 
+        background: transparent; 
+        border: 1px solid var(--cyan); 
+        color: var(--cyan);
+        border-radius: 8px;
+    }
+    .btn-refresh:hover { 
+        background: rgba(5, 217, 232, 0.15); 
+        box-shadow: 0 0 15px rgba(5, 217, 232, 0.3);
+        transform: none;
+    }
+
+    /* Password Overlay */
+    .password-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 12, 19, 0.95);
+        backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        padding: 20px;
+        transition: 0.4s;
+    }
+    .password-overlay.hidden { opacity: 0; pointer-events: none; }
+    .password-box {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 40px 30px;
+        width: 100%;
+        max-width: 380px;
+        text-align: center;
+        box-shadow: 0 0 60px rgba(5, 217, 232, 0.15);
+        animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .password-box .lock-icon { font-size: 48px; margin-bottom: 15px; }
+    .password-box h2 { 
+        color: var(--cyan); 
+        font-size: 18px; 
+        margin-bottom: 25px; 
+        letter-spacing: 3px; 
+        border: none; 
+        padding: 0; 
+        justify-content: center;
+    }
+    .password-box input { text-align: center; letter-spacing: 4px; font-size: 16px; }
+    .password-box button { margin-top: 5px; }
+
+    /* Ẩn nội dung chính khi chưa đăng nhập */
+    .main-content { display: none; width: 100%; flex-direction: column; align-items: center; }
+    .main-content.show { display: flex; }
+
+    /* Stats bar */
+    .stats-bar {
+        display: flex;
+        gap: 12px;
+        width: 100%;
+        max-width: 680px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .stat-item {
+        flex: 1;
+        min-width: 100px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+    }
+    .stat-item .num { font-size: 22px; font-weight: 800; color: var(--cyan); text-shadow: var(--glow-cyan); }
+    .stat-item .lbl { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+    .stat-item.active .num { color: var(--success); text-shadow: 0 0 10px rgba(46,213,115,0.4); }
+    .stat-item.expired .num { color: var(--danger); text-shadow: 0 0 10px rgba(255,71,87,0.4); }
 </style>
 </head>
 <body>
 
-    <h1>Quản Trị Hệ Thống</h1>
-    <div id="msg"></div>
-
-    <!-- Quản lý bảo trì -->
-    <div class="card">
-        <h2>Trạng Thái Server</h2>
-        <button onclick="adminAction('toggle_maintenance')" id="btnMaintain" class="btn-maintain">Đang tải trạng thái...</button>
-    </div>
-
-    <!-- Tạo Key -->
-    <div class="card">
-        <h2>Tạo Key VIP Mới</h2>
-        <input type="text" id="keyName" placeholder="Tên Key (VD: VIP-ABC, để trống tự tạo)">
-        <div class="row">
-            <input type="number" id="keyAmount" placeholder="Số lượng" value="1" min="1">
-            <select id="keyUnit">
-                <option value="days">Ngày</option>
-                <option value="hours">Giờ</option>
-                <option value="minutes">Phút (Để test)</option>
-                <option value="forever">Vĩnh Viễn</option>
-            </select>
+    <!-- Màn hình đăng nhập -->
+    <div class="password-overlay" id="passwordOverlay">
+        <div class="password-box">
+            <div class="lock-icon">🔒</div>
+            <h2>ADMIN ACCESS</h2>
+            <input type="password" id="passwordInput" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter') login()">
+            <button onclick="login()">Đăng Nhập</button>
+            <div id="loginMsg" style="color: var(--danger); font-size: 12px; margin-top: 12px; min-height: 16px;"></div>
         </div>
-        <button onclick="createKey()">Tạo Key Ngay</button>
     </div>
 
-    <!-- Danh sách Key -->
-    <div class="card">
-        <h2>Danh Sách Key 
-            <button onclick="loadStatus()" style="width:auto; padding:5px 15px; font-size:12px; margin:0; background:transparent; border:1px solid var(--cyan); color:var(--cyan);">Tải Lại</button>
-        </h2>
-        <div class="key-list" id="keyList">
-            <p style="text-align:center; color:#888;">Đang tải dữ liệu...</p>
+    <!-- Nội dung chính -->
+    <div class="main-content" id="mainContent">
+        <div class="header">
+            <h1>Quản Trị Hệ Thống</h1>
+            <div class="subtitle">BONTOOL ADMIN PANEL <span>v2.0</span></div>
+        </div>
+        
+        <div id="msg"></div>
+
+        <!-- Thống kê -->
+        <div class="stats-bar" id="statsBar"></div>
+
+        <!-- Tạo Key -->
+        <div class="card">
+            <h2>🔑 Tạo Key VIP Mới</h2>
+            <input type="text" id="keyName" placeholder="Tên Key (VD: VIP-ABC, để trống tự tạo)">
+            <div class="row">
+                <input type="number" id="keyAmount" placeholder="Số lượng" value="1" min="1">
+                <select id="keyUnit">
+                    <option value="days">Ngày</option>
+                    <option value="hours">Giờ</option>
+                    <option value="minutes">Phút (Test)</option>
+                    <option value="forever">Vĩnh Viễn</option>
+                </select>
+            </div>
+            <button onclick="createKey()" id="btnCreate">Tạo Key Ngay</button>
+        </div>
+
+        <!-- Danh sách Key -->
+        <div class="card">
+            <h2>Danh Sách Key 
+                <button onclick="loadStatus()" class="btn-refresh">↻ Tải Lại</button>
+            </h2>
+            <div class="key-list" id="keyList">
+                <div class="loading"><div class="spinner"></div> Đang tải dữ liệu...</div>
+            </div>
         </div>
     </div>
 
 <script>
     const API_URL = '/api/admin';
-    const PASS = 'admin123'; // Mật khẩu (Phải khớp với server.js)
+    const ADMIN_PASS = 'leminhdzz';
+    let isLoggedIn = false;
 
-    // Hàm hiển thị thông báo
+    // ===== ĐĂNG NHẬP =====
+    function login() {
+        const pass = document.getElementById('passwordInput').value;
+        const msgEl = document.getElementById('loginMsg');
+        
+        if (pass === ADMIN_PASS) {
+            isLoggedIn = true;
+            document.getElementById('passwordOverlay').classList.add('hidden');
+            document.getElementById('mainContent').classList.add('show');
+            loadStatus();
+        } else {
+            msgEl.innerText = '❌ Sai mật khẩu!';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordInput').focus();
+            setTimeout(() => { msgEl.innerText = ''; }, 2000);
+        }
+    }
+
+    // ===== THÔNG BÁO =====
     function showMsg(text, isError = false) {
         const el = document.getElementById('msg');
         el.innerText = text;
         el.className = isError ? 'error' : '';
-        setTimeout(() => { el.innerText = ''; }, 3000);
+        clearTimeout(window._msgTimeout);
+        window._msgTimeout = setTimeout(() => { el.innerText = ''; }, 3500);
     }
 
-    // Hàm gọi API chung
-    async function adminAction(action, extraData = {}) {
+    // ===== GỌI API =====
+    async function fetchAPI(action, extraData = {}) {
         try {
             const res = await fetch(API_URL, {
                 method: 'POST', 
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ password: PASS, action: action, ...extraData })
+                body: JSON.stringify({ password: ADMIN_PASS, action: action, ...extraData })
             });
             return await res.json();
         } catch(e) {
-            showMsg("Lỗi kết nối Server!", true);
-            return { success: false };
+            return { success: false, msg: "Lỗi kết nối Server!" };
         }
     }
 
-    // Tải trạng thái và danh sách key
+    // ===== LOAD TRẠNG THÁI & DANH SÁCH KEY =====
     async function loadStatus() {
-        const data = await adminAction('get_keys');
-        if (!data.success) return;
-
-        // 1. Cập nhật nút bảo trì
-        const btnM = document.getElementById('btnMaintain');
-        if (data.maintenance) {
-            btnM.innerText = "🔴 ĐANG BẢO TRÌ (Bấm để TẮT)";
-            btnM.className = "btn-maintain active";
-        } else {
-            btnM.innerText = "🟢 HỆ THỐNG BÌNH THƯỜNG (Bấm để BẬT)";
-            btnM.className = "btn-maintain";
-        }
-        
-        // 2. Render danh sách key
-        const listEl = document.getElementById('keyList');
-        listEl.innerHTML = ''; // Xóa cũ
-        
-        const keys = data.keys;
-        const keyNames = Object.keys(keys);
-
-        if (keyNames.length === 0) {
-            listEl.innerHTML = '<p style="text-align:center; color:#888; padding: 20px 0;">Chưa có Key nào được tạo.</p>';
+        const data = await fetchAPI('get_keys');
+        if (!data.success) {
+            showMsg('Không thể tải dữ liệu!', true);
             return;
         }
 
-        // Đảo ngược mảng để key mới tạo hiện lên đầu
+        const keys = data.keys || {};
+        const keyNames = Object.keys(keys);
+        
+        // Cập nhật stats
+        updateStats(keys, keyNames);
+
+        // Render danh sách
+        const listEl = document.getElementById('keyList');
+        listEl.innerHTML = '';
+
+        if (keyNames.length === 0) {
+            listEl.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📭</div>
+                    <div>Chưa có Key nào được tạo.</div>
+                </div>`;
+            return;
+        }
+
+        // Đảo ngược để key mới nhất lên đầu
         keyNames.reverse().forEach(k => {
             const item = keys[k];
             let timeStr = "";
-            let isExpired = false;
             let priceBadge = "";
+            let isExpired = false;
 
-            if (item.expiresAt === "forever") {
-                timeStr = `<span class="forever">Vĩnh Viễn</span>`;
-                priceBadge = `<span class="key-price" style="color:#55ff55; border-color:#55ff55; background:rgba(85,255,85,0.1)">VĨNH VIỄN</span>`;
+            if (item.expiresAt === "forever" || item.expiresAt === Infinity) {
+                timeStr = `<span class="forever">♾️ Vĩnh Viễn</span>`;
+                priceBadge = `<span class="key-price" style="color:var(--success); border-color:var(--success); background:rgba(46,213,115,0.1)">VĨNH VIỄN</span>`;
             } else {
                 const expDate = new Date(item.expiresAt);
-                timeStr = expDate.toLocaleString('vi-VN');
                 if (Date.now() > item.expiresAt) {
-                    timeStr = `<span class="expired">${timeStr} (Đã hết hạn)</span>`;
+                    timeStr = `<span class="expired">${expDate.toLocaleString('vi-VN')} (Hết hạn)</span>`;
                     isExpired = true;
+                    priceBadge = `<span class="key-price" style="color:var(--danger); border-color:var(--danger); background:rgba(255,71,87,0.1)">HẾT HẠN</span>`;
+                } else {
+                    timeStr = expDate.toLocaleString('vi-VN');
+                    priceBadge = `<span class="key-price" style="color:var(--success); border-color:var(--success); background:rgba(46,213,115,0.1)">ACTIVE</span>`;
                 }
             }
 
-            const ipStr = item.ip ? `<span style="color:#f39c12">${item.ip}</span>` : `<span style="color:#55ff55">Chưa khóa</span>`;
+            const ipStr = item.ip 
+                ? `<span class="ip-active">🌐 ${item.ip}</span>` 
+                : `<span class="ip-free">🔓 Chưa khóa</span>`;
 
             const html = `
                 <div class="key-item">
@@ -198,12 +514,12 @@
                         ${priceBadge}
                     </div>
                     <div class="key-info">
-                        <div>Hạn sử dụng: ${timeStr}</div>
-                        <div>IP đã khóa: ${ipStr}</div>
+                        <div><span class="label">⏰ Hạn sử dụng:</span> <span class="value">${timeStr}</span></div>
+                        <div><span class="label">🌍 IP đã khóa:</span> ${ipStr}</div>
                     </div>
                     <div class="key-actions">
-                        <button class="btn-reset" onclick="resetIP('${k}')">Reset IP</button>
-                        <button class="btn-delete" onclick="deleteKey('${k}')">Xóa Key</button>
+                        <button class="btn-reset" onclick="resetIP('${k}')">🔄 Reset IP</button>
+                        <button class="btn-delete" onclick="deleteKey('${k}')">🗑️ Xóa Key</button>
                     </div>
                 </div>
             `;
@@ -211,25 +527,39 @@
         });
     }
 
-    // Bật / Tắt bảo trì
-    async function adminAction(action) {
-        if (action === 'toggle_maintenance') {
-            const data = await fetchAPI('toggle_maintenance');
-            if (data.success) {
-                showMsg(data.msg);
-                loadStatus(); // Load lại giao diện
+    // ===== CẬP NHẬT STATS =====
+    function updateStats(keys, keyNames) {
+        let total = keyNames.length;
+        let active = 0, expired = 0, forever = 0, locked = 0;
+
+        keyNames.forEach(k => {
+            const item = keys[k];
+            if (item.expiresAt === "forever" || item.expiresAt === Infinity) {
+                forever++; active++;
+            } else if (Date.now() > item.expiresAt) {
+                expired++;
+            } else {
+                active++;
             }
-        }
+            if (item.ip) locked++;
+        });
+
+        document.getElementById('statsBar').innerHTML = `
+            <div class="stat-item"><div class="num">${total}</div><div class="lbl">Tổng Key</div></div>
+            <div class="stat-item active"><div class="num">${active}</div><div class="lbl">Hoạt động</div></div>
+            <div class="stat-item expired"><div class="num">${expired}</div><div class="lbl">Hết hạn</div></div>
+            <div class="stat-item"><div class="num">${locked}</div><div class="lbl">Đã khóa IP</div></div>
+        `;
     }
 
-    // Tạo Key
+    // ===== TẠO KEY =====
     async function createKey() {
-        const keyInput = document.getElementById('keyName').value;
-        const amount = document.getElementById('keyAmount').value;
+        const keyInput = document.getElementById('keyName').value.trim();
+        const amount = parseInt(document.getElementById('keyAmount').value) || 1;
         const unit = document.getElementById('keyUnit').value;
         
-        const btn = document.querySelector('button[onclick="createKey()"]');
-        btn.innerText = "ĐANG TẠO...";
+        const btn = document.getElementById('btnCreate');
+        btn.innerText = "⏳ ĐANG TẠO...";
         btn.disabled = true;
 
         const data = await fetchAPI('create_key', { key: keyInput, amount: amount, unit: unit });
@@ -238,61 +568,62 @@
         btn.disabled = false;
 
         if (data.success) {
-            showMsg(`Tạo thành công: ${data.key}`);
-            document.getElementById('keyName').value = ''; // Xóa ô nhập
-            loadStatus(); // Load lại danh sách
+            showMsg(`✅ ${data.msg || 'Tạo key thành công: ' + data.key}`);
+            document.getElementById('keyName').value = '';
+            loadStatus();
         } else {
-            showMsg(data.msg, true);
+            showMsg('❌ ' + (data.msg || 'Có lỗi xảy ra!'), true);
         }
     }
 
-    // Reset IP
+    // ===== RESET IP =====
     async function resetIP(key) {
         if (!confirm(`Bạn có chắc muốn Reset IP cho key: ${key}?`)) return;
         const data = await fetchAPI('reset_ip', { key: key });
         if (data.success) {
-            showMsg(data.msg);
+            showMsg(`✅ ${data.msg || 'Đã reset IP!'}`);
             loadStatus();
         } else {
-            showMsg(data.msg, true);
+            showMsg('❌ ' + (data.msg || 'Lỗi!'), true);
         }
     }
 
-    // Xóa Key
+    // ===== XÓA KEY =====
     async function deleteKey(key) {
-        if (!confirm(`CẢNH BÁO: Bạn có chắc muốn XÓA VĨNH VIỄN key: ${key}?`)) return;
+        if (!confirm(`⚠️ CẢNH BÁO: Bạn có chắc muốn XÓA VĨNH VIỄN key:\n\n${key}\n\nHành động này không thể hoàn tác!`)) return;
         const data = await fetchAPI('delete_key', { key: key });
         if (data.success) {
-            showMsg(data.msg);
+            showMsg(`✅ ${data.msg || 'Đã xóa key!'}`);
             loadStatus();
         } else {
-            showMsg(data.msg, true);
+            showMsg('❌ ' + (data.msg || 'Lỗi!'), true);
         }
     }
 
-    // Hàm gọi API chung (viết lại cho gọn)
-    async function fetchAPI(action, extraData = {}) {
-        try {
-            const res = await fetch(API_URL, {
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ password: PASS, action: action, ...extraData })
-            });
-            return await res.json();
-        } catch(e) {
-            return { success: false, msg: "Lỗi kết nối Server!" };
-        }
-    }
-
-    // Copy text
+    // ===== COPY =====
     function copyText(text) {
-        navigator.clipboard.writeText(text);
-        showMsg("Đã copy key!");
+        navigator.clipboard.writeText(text).then(() => {
+            showMsg("📋 Đã copy key!");
+        }).catch(() => {
+            // Fallback
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showMsg("📋 Đã copy key!");
+        });
     }
 
-    // Chạy khi load trang
+    // ===== AUTO REFRESH mỗi 30s =====
+    setInterval(() => {
+        if (isLoggedIn) loadStatus();
+    }, 30000);
+
+    // Focus vào ô mật khẩu khi load
     window.onload = () => {
-        loadStatus();
+        document.getElementById('passwordInput').focus();
     };
 </script>
 </body>
