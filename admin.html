@@ -58,7 +58,7 @@
         border-radius: 16px; 
         padding: 24px; 
         width: 100%; 
-        max-width: 680px; 
+        max-width: 720px; 
         margin-bottom: 20px;
         box-shadow: 0 8px 30px rgba(0,0,0,0.6);
         transition: 0.3s;
@@ -124,15 +124,15 @@
     .row select { flex: 1.2; }
 
     /* Danh sách Key */
-    .key-list { display: flex; flex-direction: column; gap: 12px; max-height: 500px; overflow-y: auto; padding-right: 6px;}
+    .key-list { display: flex; flex-direction: column; gap: 12px; max-height: 600px; overflow-y: auto; padding-right: 6px;}
     .key-item { 
         background: #0a0b12; 
         border: 1px solid var(--border); 
-        border-radius: 12px; 
-        padding: 16px; 
+        border-radius: 14px; 
+        padding: 18px; 
         display: flex; 
         flex-direction: column; 
-        gap: 10px; 
+        gap: 12px; 
         transition: 0.3s;
         position: relative;
         overflow: hidden;
@@ -151,7 +151,7 @@
         transform: translateX(3px);
     }
     
-    .key-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .key-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
     .key-name { 
         font-weight: 700; 
         color: var(--cyan); 
@@ -161,6 +161,7 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        flex-wrap: wrap;
     }
     .key-price { 
         font-size: 11px; 
@@ -178,25 +179,83 @@
         color: var(--text-dim); 
         display: flex; 
         flex-direction: column; 
-        gap: 6px; 
+        gap: 8px; 
         background: rgba(0,0,0,0.3);
-        padding: 10px 12px;
-        border-radius: 8px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.03);
     }
-    .key-info > div { display: flex; align-items: center; gap: 8px; }
-    .key-info .label { color: var(--text-dim); min-width: 100px; }
-    .key-info .value { color: #fff; font-weight: 500; }
+    .key-info > div { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+    .key-info .label { color: var(--text-dim); min-width: 120px; font-weight: 500; }
+    .key-info .value { color: #fff; font-weight: 500; word-break: break-all; }
     .expired { color: var(--danger) !important; font-weight: 700; }
     .forever { 
         color: var(--success) !important; 
         font-weight: 700; 
         text-shadow: 0 0 8px rgba(46, 213, 115, 0.5);
     }
-    .ip-active { color: var(--warning); font-family: 'Courier New', monospace; }
+    .ip-active { 
+        color: var(--warning); 
+        font-family: 'Courier New', monospace;
+        background: rgba(255,165,2,0.1);
+        padding: 2px 8px;
+        border-radius: 6px;
+        border: 1px solid rgba(255,165,2,0.3);
+        display: inline-block;
+    }
     .ip-free { color: var(--success); }
 
+    /* Card thông tin người dùng (IP, thiết bị...) */
+    .user-info-box {
+        background: linear-gradient(135deg, rgba(5,217,232,0.08), rgba(181,55,242,0.08));
+        border: 1px solid rgba(5,217,232,0.25);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-top: 4px;
+        animation: fadeSlide 0.4s ease;
+    }
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .user-info-box .ui-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--cyan);
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .user-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 8px 16px;
+    }
+    .user-info-grid .ui-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .user-info-grid .ui-item .k {
+        font-size: 10px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .user-info-grid .ui-item .v {
+        font-size: 12px;
+        color: #fff;
+        font-weight: 600;
+        word-break: break-all;
+    }
+    .user-info-grid .ui-item .v.mono { font-family: 'Courier New', monospace; color: var(--cyan); }
+    .user-info-grid .ui-item .v.warn { color: var(--warning); }
+
     /* Nút hành động trong key */
-    .key-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .key-actions { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
     .key-actions button { 
         padding: 9px 12px; 
         font-size: 12px; 
@@ -204,12 +263,15 @@
         border-radius: 8px; 
         text-transform: none;
         flex: 1;
+        min-width: 120px;
         letter-spacing: 0.3px;
     }
     .btn-reset { background: rgba(255, 165, 2, 0.15); color: var(--warning); border: 1px solid rgba(255,165,2,0.4); }
     .btn-reset:hover { background: var(--warning); color: #000; box-shadow: 0 4px 15px rgba(255,165,2,0.4); }
     .btn-delete { background: rgba(255, 71, 87, 0.15); color: var(--danger); border: 1px solid rgba(255,71,87,0.4); }
     .btn-delete:hover { background: var(--danger); color: #fff; box-shadow: 0 4px 15px rgba(255,71,87,0.4); }
+    .btn-detail { background: rgba(5,217,232,0.15); color: var(--cyan); border: 1px solid rgba(5,217,232,0.4); }
+    .btn-detail:hover { background: var(--cyan); color: #000; box-shadow: 0 4px 15px rgba(5,217,232,0.4); }
     
     /* Thông báo */
     #msg { 
@@ -243,6 +305,8 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
         transition: 0.2s;
+        width: auto;
+        margin: 0;
     }
     .copy-btn:hover { background: rgba(5, 217, 232, 0.2); box-shadow: 0 0 10px rgba(5,217,232,0.3); }
 
@@ -337,7 +401,7 @@
         display: flex;
         gap: 12px;
         width: 100%;
-        max-width: 680px;
+        max-width: 720px;
         margin-bottom: 20px;
         flex-wrap: wrap;
     }
@@ -349,11 +413,73 @@
         border-radius: 12px;
         padding: 14px;
         text-align: center;
+        transition: 0.3s;
     }
+    .stat-item:hover { border-color: rgba(5,217,232,0.3); transform: translateY(-2px); }
     .stat-item .num { font-size: 22px; font-weight: 800; color: var(--cyan); text-shadow: var(--glow-cyan); }
     .stat-item .lbl { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
     .stat-item.active .num { color: var(--success); text-shadow: 0 0 10px rgba(46,213,115,0.4); }
     .stat-item.expired .num { color: var(--danger); text-shadow: 0 0 10px rgba(255,71,87,0.4); }
+
+    /* Modal chi tiết */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(6px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        padding: 20px;
+    }
+    .modal-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+    .modal-box {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 28px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 0 60px rgba(5,217,232,0.2);
+        position: relative;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .modal-box h3 {
+        color: var(--cyan);
+        font-size: 16px;
+        margin-bottom: 18px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 12px;
+    }
+    .modal-close {
+        position: absolute;
+        top: 14px; right: 14px;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0; padding: 0;
+    }
+    .modal-close:hover { color: var(--danger); border-color: var(--danger); background: rgba(255,71,87,0.1); transform: none; box-shadow: none; }
+    .modal-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        font-size: 13px;
+        gap: 12px;
+    }
+    .modal-row .k { color: var(--text-dim); flex-shrink: 0; }
+    .modal-row .v { color: #fff; font-weight: 600; text-align: right; word-break: break-all; }
+    .modal-row .v.mono { font-family: 'Courier New', monospace; color: var(--cyan); }
 </style>
 </head>
 <body>
@@ -373,7 +499,7 @@
     <div class="main-content" id="mainContent">
         <div class="header">
             <h1>Quản Trị Hệ Thống</h1>
-            <div class="subtitle">BONTOOL ADMIN PANEL <span>v2.0</span></div>
+            <div class="subtitle">BONTOOL ADMIN PANEL <span>v2.1</span></div>
         </div>
         
         <div id="msg"></div>
@@ -408,10 +534,20 @@
         </div>
     </div>
 
+    <!-- Modal chi tiết -->
+    <div class="modal-overlay" id="detailModal" onclick="if(event.target===this) closeModal()">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <h3>🔍 Chi Tiết Key</h3>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
 <script>
     const API_URL = '/api/admin';
     const ADMIN_PASS = 'leminhdzz';
     let isLoggedIn = false;
+    let cachedKeys = {};
 
     // ===== ĐĂNG NHẬP =====
     function login() {
@@ -454,6 +590,16 @@
         }
     }
 
+    // ===== FORMAT NGÀY =====
+    function fmtDate(ts) {
+        if (ts === "forever" || ts === Infinity) return "♾️ Vĩnh Viễn";
+        const d = new Date(ts);
+        return d.toLocaleString('vi-VN', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+
     // ===== LOAD TRẠNG THÁI & DANH SÁCH KEY =====
     async function loadStatus() {
         const data = await fetchAPI('get_keys');
@@ -463,12 +609,11 @@
         }
 
         const keys = data.keys || {};
+        cachedKeys = keys;
         const keyNames = Object.keys(keys);
         
-        // Cập nhật stats
         updateStats(keys, keyNames);
 
-        // Render danh sách
         const listEl = document.getElementById('keyList');
         listEl.innerHTML = '';
 
@@ -481,43 +626,93 @@
             return;
         }
 
-        // Đảo ngược để key mới nhất lên đầu
         keyNames.reverse().forEach(k => {
             const item = keys[k];
             let timeStr = "";
-            let priceBadge = "";
+            let statusBadge = "";
             let isExpired = false;
 
             if (item.expiresAt === "forever" || item.expiresAt === Infinity) {
                 timeStr = `<span class="forever">♾️ Vĩnh Viễn</span>`;
-                priceBadge = `<span class="key-price" style="color:var(--success); border-color:var(--success); background:rgba(46,213,115,0.1)">VĨNH VIỄN</span>`;
+                statusBadge = `<span class="key-price" style="color:var(--success); border-color:var(--success); background:rgba(46,213,115,0.1)">VĨNH VIỄN</span>`;
             } else {
                 const expDate = new Date(item.expiresAt);
                 if (Date.now() > item.expiresAt) {
                     timeStr = `<span class="expired">${expDate.toLocaleString('vi-VN')} (Hết hạn)</span>`;
                     isExpired = true;
-                    priceBadge = `<span class="key-price" style="color:var(--danger); border-color:var(--danger); background:rgba(255,71,87,0.1)">HẾT HẠN</span>`;
+                    statusBadge = `<span class="key-price" style="color:var(--danger); border-color:var(--danger); background:rgba(255,71,87,0.1)">HẾT HẠN</span>`;
                 } else {
                     timeStr = expDate.toLocaleString('vi-VN');
-                    priceBadge = `<span class="key-price" style="color:var(--success); border-color:var(--success); background:rgba(46,213,115,0.1)">ACTIVE</span>`;
+                    statusBadge = `<span class="key-price" style="color:var(--success); border-color:var(--success); background:rgba(46,213,115,0.1)">ACTIVE</span>`;
                 }
             }
 
+            // IP & thông tin người dùng
             const ipStr = item.ip 
                 ? `<span class="ip-active">🌐 ${item.ip}</span>` 
                 : `<span class="ip-free">🔓 Chưa khóa</span>`;
+
+            // Box thông tin người dùng nếu có IP
+            let userInfoBox = '';
+            if (item.ip) {
+                const lastLogin = item.lastLogin ? fmtDate(item.lastLogin) : '—';
+                const firstLogin = item.firstLogin ? fmtDate(item.firstLogin) : '—';
+                const device = item.device || 'Không xác định';
+                const location = item.location || 'Không xác định';
+                const userAgent = item.userAgent || '—';
+                const totalLogins = item.totalLogins || 1;
+                const hwid = item.hwid || '—';
+
+                userInfoBox = `
+                    <div class="user-info-box">
+                        <div class="ui-title">👤 Thông Tin Người Dùng</div>
+                        <div class="user-info-grid">
+                            <div class="ui-item">
+                                <span class="k">IP Address</span>
+                                <span class="v mono">${item.ip}</span>
+                            </div>
+                            <div class="ui-item">
+                                <span class="k">Thiết bị</span>
+                                <span class="v">${device}</span>
+                            </div>
+                            <div class="ui-item">
+                                <span class="k">Vị trí</span>
+                                <span class="v warn">${location}</span>
+                            </div>
+                            <div class="ui-item">
+                                <span class="k">HWID</span>
+                                <span class="v mono">${hwid}</span>
+                            </div>
+                            <div class="ui-item">
+                                <span class="k">Đăng nhập đầu</span>
+                                <span class="v">${firstLogin}</span>
+                            </div>
+                            <div class="ui-item">
+                                <span class="k">Đăng nhập cuối</span>
+                                <span class="v">${lastLogin}</span>
+                            </div>
+                            <div class="ui-item">
+                                <span class="k">Số lần đăng nhập</span>
+                                <span class="v">${totalLogins} lần</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
 
             const html = `
                 <div class="key-item">
                     <div class="key-header">
                         <div class="key-name">${k} <button class="copy-btn" onclick="copyText('${k}')">Copy</button></div>
-                        ${priceBadge}
+                        ${statusBadge}
                     </div>
                     <div class="key-info">
                         <div><span class="label">⏰ Hạn sử dụng:</span> <span class="value">${timeStr}</span></div>
                         <div><span class="label">🌍 IP đã khóa:</span> ${ipStr}</div>
                     </div>
+                    ${userInfoBox}
                     <div class="key-actions">
+                        ${item.ip ? `<button class="btn-detail" onclick="showDetail('${k}')">📋 Chi Tiết</button>` : ''}
                         <button class="btn-reset" onclick="resetIP('${k}')">🔄 Reset IP</button>
                         <button class="btn-delete" onclick="deleteKey('${k}')">🗑️ Xóa Key</button>
                     </div>
@@ -525,6 +720,34 @@
             `;
             listEl.innerHTML += html;
         });
+    }
+
+    // ===== HIỂN THỊ CHI TIẾT =====
+    function showDetail(key) {
+        const item = cachedKeys[key];
+        if (!item) return;
+        const lastLogin = item.lastLogin ? fmtDate(item.lastLogin) : '—';
+        const firstLogin = item.firstLogin ? fmtDate(item.firstLogin) : '—';
+        const expAt = item.expiresAt === "forever" || item.expiresAt === Infinity 
+            ? '♾️ Vĩnh Viễn' 
+            : fmtDate(item.expiresAt);
+
+        document.getElementById('modalContent').innerHTML = `
+            <div class="modal-row"><span class="k">Key</span><span class="v mono">${key}</span></div>
+            <div class="modal-row"><span class="k">Hạn sử dụng</span><span class="v">${expAt}</span></div>
+            <div class="modal-row"><span class="k">IP Address</span><span class="v mono">${item.ip || '—'}</span></div>
+            <div class="modal-row"><span class="k">Thiết bị</span><span class="v">${item.device || 'Không xác định'}</span></div>
+            <div class="modal-row"><span class="k">Vị trí</span><span class="v">${item.location || 'Không xác định'}</span></div>
+            <div class="modal-row"><span class="k">HWID</span><span class="v mono">${item.hwid || '—'}</span></div>
+            <div class="modal-row"><span class="k">User Agent</span><span class="v" style="font-size:11px;">${item.userAgent || '—'}</span></div>
+            <div class="modal-row"><span class="k">Đăng nhập đầu</span><span class="v">${firstLogin}</span></div>
+            <div class="modal-row"><span class="k">Đăng nhập cuối</span><span class="v">${lastLogin}</span></div>
+            <div class="modal-row"><span class="k">Tổng đăng nhập</span><span class="v">${item.totalLogins || 1} lần</span></div>
+        `;
+        document.getElementById('detailModal').classList.add('show');
+    }
+    function closeModal() {
+        document.getElementById('detailModal').classList.remove('show');
     }
 
     // ===== CẬP NHẬT STATS =====
@@ -605,7 +828,6 @@
         navigator.clipboard.writeText(text).then(() => {
             showMsg("📋 Đã copy key!");
         }).catch(() => {
-            // Fallback
             const ta = document.createElement('textarea');
             ta.value = text;
             document.body.appendChild(ta);
